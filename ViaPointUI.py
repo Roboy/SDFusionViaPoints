@@ -8,10 +8,11 @@ handlers = []
 ui = None
 app = None
 rowNumber = 0
+numberViaPoints = 3
 
-def addRow(tableInput):
+def addRow(tableInput,i):
     tableChildInputs = tableInput.commandInputs
-    childTableNumberInput = tableChildInputs.addIntegerSpinnerCommandInput(tableInput.id + '_number{}'.format(rowNumber), 'Via-Point Number', 0 , 50 , 1, 0)
+    childTableNumberInput = tableChildInputs.addIntegerSpinnerCommandInput(tableInput.id + '_number{}'.format(rowNumber), 'Via-Point Number', 0 , 50 , 1, i)
     childTableLinkInput =  tableChildInputs.addDropDownCommandInput(tableInput.id + '_link{}'.format(rowNumber), 'Select Link Name', adsk.core.DropDownStyles.LabeledIconDropDownStyle);
     dropdownItems = childTableLinkInput.listItems
     # TODO: rigidGroupSupport
@@ -19,7 +20,8 @@ def addRow(tableInput):
     dropdownItems.add('Link 2', False, '')
     childTableSelectInput =  tableChildInputs.addDropDownCommandInput(tableInput.id + '_select{}'.format(rowNumber), 'Select Point Number', adsk.core.DropDownStyles.LabeledIconDropDownStyle);
     dropdownItemsSelect = childTableSelectInput.listItems
-    for i in range(1,10):
+    global numberViaPoints
+    for i in range(1,numberViaPoints):
         dropdownItemsSelect.add('Select Number ' + str(i), False, '')
     
     row = tableInput.rowCount
@@ -44,7 +46,7 @@ class ButtonCommandCreatedHandler(adsk.core.CommandCreatedEventHandler):
         tab1ChildInputs = tabCmdInput1.children;
 
         # Create integer spinner input
-        tab1ChildInputs.addIntegerSpinnerCommandInput(commandId + '_spinnerInt', 'MyoMuscle Number', 0 , 500 , 1, 0)
+        tab1ChildInputs.addIntegerSpinnerCommandInput(commandId + '_muscle', 'MyoMuscle Number', 0 , 500 , 1, 0)
 
         # Create table input
         tableInput = tab1ChildInputs.addTableCommandInput(commandId + '_table', 'Via-Points', 3, '1:1:2')
@@ -63,50 +65,19 @@ class ButtonCommandCreatedHandler(adsk.core.CommandCreatedEventHandler):
         global rowNumber
         rowNumber = rowNumber + 1
 
-        addRow(tableInput)
+        global numberViaPoints
 
-        for i in range(1,9                              ):
-            addRow(tableInput)
+        for i in range(1,numberViaPoints):
+            addRow(tableInput,i)
 
             # Create selection input
             selectionInput = tab1ChildInputs.addSelectionInput(commandId + '_selection' + str(i), 'Select Point ' + str(i), 'Select a circle for the via-point.')
             selectionInput.setSelectionLimits(1, 1)
             selectionInput.addSelectionFilter("CircularEdges")
 
-        #onSelectionEvent = MySelectionEventHandler()
-        #cmd.selectionEvent.add(onSelectionEvent)
-        #handlers.append(onSelectionEvent)
-
         onExecuteEvent = MyExecuteEventHandler()
         cmd.execute.add(onExecuteEvent)
         handlers.append(onExecuteEvent)
-
-        #onInputChanged = MyCommandInputChangedHandler()
-        #cmd.inputChanged.add(onInputChanged)
-        #handlers.append(onInputChanged) 
-
-class MyCommandInputChangedHandler(adsk.core.InputChangedEventHandler):
-    def __init__(self):
-        super().__init__()
-    def notify(self, args):
-        try:
-           command = args.firingEvent.sender   
-           cmdInput = args.input                   
-           inputs = command.commandInputs
-           
-           commandId = "xyz"
-           tableInput = inputs.itemById(commandId + '_table')
-           if cmdInput.id == tableInput.id + '_add':
-               addRow(tableInput)
-           elif cmdInput.id == tableInput.id + '_delete':
-               if tableInput.selectedRow == -1:
-                   ui.messageBox('Select one row to delete')
-               else:
-                   tableInput.deleteRow(tableInput.selectedRow)
-          
-        except:
-            if ui:
-                ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
 
 # Event handler for the execute event.
 class MyExecuteEventHandler(adsk.core.CommandEventHandler):
@@ -118,11 +89,24 @@ class MyExecuteEventHandler(adsk.core.CommandEventHandler):
             command = eventArgs.firingEvent.sender   
             #cmdInput = eventArgs.input                   
             inputs = command.commandInputs
-
             commandId = "xyz"
+            muscleInput = inputs.itemById(commandId + '_muscle')
+            muscle = muscleInput.value
+            tableInput = inputs.itemById(commandId + '_table')
 
-            for i in range(1,9):
-                selInput = inputs.itemById(commandId + '_selection' + str(i))
+            global numberViaPoints
+
+            for i in range(1,numberViaPoints):
+                numberInput = tableInput.getInputAtPosition(i, 1).id
+                global ui
+                ui.messageBox(numberInput)
+                numberInput = inputs.itemById(numberInput)
+                number = numberInput.value
+                linkInput = tableInput.getInputAtPosition(i, 2)
+                link = linkInput.listItems.item(linkInput.selectedItem)
+                selectionInput = tableInput.getInputAtPosition(i, 3)
+                selection = selectionInput.listItems.item(selectionInput.selectedItem)
+                selInput = inputs.itemById(commandId + '_selection' + selection[-1:])
                 #if cmdInput.id == selInput.id:
                 if selInput is None:
                     global ui
@@ -144,7 +128,7 @@ class MyExecuteEventHandler(adsk.core.CommandEventHandler):
                 # Create construction point by center
                 pointInput.setByCenter(edge)
                 point = conPoints.add(pointInput)
-                point.name = "asdfghjkl" + str(i)
+                point.name = "VP_motor"+ muscle + "_" + link + "_" + number
           
         except:
             if ui:
@@ -153,21 +137,6 @@ class MyExecuteEventHandler(adsk.core.CommandEventHandler):
 
         # Code to react to the event.
         ui.messageBox('In MyExecuteHandler event handler.')
-
-# Event handler for the selectionEvent event.
-class MySelectionEventHandler(adsk.core.SelectionEventHandler):
-    def __init__(self):
-        super().__init__()
-    def notify(self, args):
-        eventArgs = adsk.core.SelectionEventArgs.cast(args)
-        #sel = eventArgs.selection(0)
-        #edge = adsk.fusion.BRepEdge.cast(sel.entity)
-
-        global ui
-        ui.messageBox("Edge")
-
-        # Code to react to the event.
-        ui.messageBox('In MySelectionEventHandler event handler.')
 
 def run(context):
     ui = None
@@ -195,19 +164,6 @@ def run(context):
         buttonControl = ViaPointPanel.controls.addCommand(button, 'ViaPointButtonID')
         buttonControl.isPromoted = True
         #buttonControl.isPromotedByDefault = True
-
-        # Delete the button definition.
-        #buttonExample = ui.commandDefinitions.itemById('VPUI_CmdID')
-        #if buttonExample:
-        #    buttonExample.deleteMe()
-            
-        # Get panel the control is in.
-        #addInsPanel = ui.allToolbarPanels.itemById('SolidScriptsAddinsPanel')
-
-        # Get and delete the button control.
-        #buttonControl = addInsPanel.controls.itemById('VPUI_CmdID')
-        #if buttonControl:
-        #    buttonControl.deleteMe()
 
         # Prevent this module from being terminate when the script returns, because we are waiting for event handlers to fire
         #adsk.autoTerminate(False)
