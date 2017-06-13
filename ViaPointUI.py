@@ -96,26 +96,20 @@ class MyExecuteEventHandler(adsk.core.CommandEventHandler):
 
             global numberViaPoints
 
+            edges = []
             for i in range(1,numberViaPoints):
-                numberInput = tableInput.getInputAtPosition(i, 1).id
-                global ui
-                ui.messageBox(numberInput)
+                edge = adsk.fusion.BRepEdge.cast(inputs.itemById(commandId + '_selection' + str(i)).selection(0).entity)
+                edges.append(edge)
+
+            for i in range(1,numberViaPoints):
+                numberInput = tableInput.getInputAtPosition(i, 0).id
                 numberInput = inputs.itemById(numberInput)
                 number = numberInput.value
-                linkInput = tableInput.getInputAtPosition(i, 2)
-                link = linkInput.listItems.item(linkInput.selectedItem)
-                selectionInput = tableInput.getInputAtPosition(i, 3)
-                selection = selectionInput.listItems.item(selectionInput.selectedItem)
-                selInput = inputs.itemById(commandId + '_selection' + selection[-1:])
-                #if cmdInput.id == selInput.id:
-                if selInput is None:
-                    global ui
-                    ui.messageBox("nay")
-                
-                sel = selInput.selection(0)
-                edge = adsk.fusion.BRepEdge.cast(sel.entity)
-                global ui
-                ui.messageBox("yay")
+                linkInput = tableInput.getInputAtPosition(i, 1)
+                link = linkInput.selectedItem.name
+                selectionInput = tableInput.getInputAtPosition(i, 2)
+                selection = selectionInput.selectedItem.name
+                edge = edges[int(selection[-1:])-1]
                 # Get construction points
                 global app
                 product = app.activeProduct
@@ -128,15 +122,11 @@ class MyExecuteEventHandler(adsk.core.CommandEventHandler):
                 # Create construction point by center
                 pointInput.setByCenter(edge)
                 point = conPoints.add(pointInput)
-                point.name = "VP_motor"+ muscle + "_" + link + "_" + number
+                point.name = "VP_motor"+ str(muscle) + "_" + link + "_" + str(number)
           
         except:
             if ui:
                 ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
-
-
-        # Code to react to the event.
-        ui.messageBox('In MyExecuteHandler event handler.')
 
 def run(context):
     ui = None
