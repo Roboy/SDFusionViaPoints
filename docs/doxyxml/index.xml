@@ -1,26 +1,23 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
 <doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.8.11">
-  <compound refid="namespace_s_d_fusion" kind="namespace"><name>SDFusion</name>
-    <member refid="namespace_s_d_fusion_1a219cbf2c1ee20eacce22fdbe69577f13" kind="variable"><name>design</name></member>
-    <member refid="namespace_s_d_fusion_1a1e4586d14850ae4cf526680a3c49cc6a" kind="variable"><name>fileDir</name></member>
-    <member refid="namespace_s_d_fusion_1ad9e4c1058db739b42d4d16eac4dd9736" kind="variable"><name>modelName</name></member>
-    <member refid="namespace_s_d_fusion_1aef9425fa7b96797687dc0c651f925025" kind="variable"><name>rootOcc</name></member>
-    <member refid="namespace_s_d_fusion_1ad9d58eb8474af5abcc947ecabc2fbae8" kind="function"><name>gazeboMatrix</name></member>
-    <member refid="namespace_s_d_fusion_1a983bd2c7c97b3edcce7845316040159c" kind="function"><name>vectorToString</name></member>
-    <member refid="namespace_s_d_fusion_1a4e40458cec59a5cd416972fffa69172e" kind="function"><name>sdfPoseVector</name></member>
-    <member refid="namespace_s_d_fusion_1ac565f1d7528daf578e2a19343b3af871" kind="function"><name>sdfPoseMatrix</name></member>
-    <member refid="namespace_s_d_fusion_1ad910e028274986c446803119ff722a11" kind="function"><name>sdfInertial</name></member>
-    <member refid="namespace_s_d_fusion_1a030d7bfb204eb03dcc75c739b2032f4d" kind="function"><name>sdfMom</name></member>
-    <member refid="namespace_s_d_fusion_1a887b4378aceeb4817399fe0dfe81fc28" kind="function"><name>sdfInertia</name></member>
-    <member refid="namespace_s_d_fusion_1a55da14e942487b28a87d13316ad69485" kind="function"><name>linkSDF</name></member>
-    <member refid="namespace_s_d_fusion_1afd26be0b30aee26c5e9317502c303faa" kind="function"><name>jointSDF</name></member>
-    <member refid="namespace_s_d_fusion_1a7a30d112a08dc438704b99988e910fd1" kind="function"><name>revoluteJoint</name></member>
-    <member refid="namespace_s_d_fusion_1af510d43ccec0def809fcb4728eca6150" kind="function"><name>exportToSTL</name></member>
-    <member refid="namespace_s_d_fusion_1a3c688c19bdb6661859c089c11fb24e84" kind="function"><name>rigidGroupToSTL</name></member>
-    <member refid="namespace_s_d_fusion_1aca49eb8bcd2a11b732fb0d327534314e" kind="function"><name>occurrenceToSTL</name></member>
-    <member refid="namespace_s_d_fusion_1ae1ae019691620803c53824f885012ed2" kind="function"><name>clearName</name></member>
-    <member refid="namespace_s_d_fusion_1a3543f5250b401f0b56e6e822b7b1cc78" kind="function"><name>run</name></member>
+  <compound refid="class_s_d_fusion_via_points_1_1_button_command_created_handler" kind="class"><name>SDFusionViaPoints::ButtonCommandCreatedHandler</name>
+    <member refid="class_s_d_fusion_via_points_1_1_button_command_created_handler_1a9f9adc29188b676e6eb66e82afd4c24c" kind="function"><name>__init__</name></member>
+    <member refid="class_s_d_fusion_via_points_1_1_button_command_created_handler_1a6f0f27db8ded2ab563a9d95106f90404" kind="function"><name>notify</name></member>
   </compound>
-  <compound refid="_s_d_fusion_8py" kind="file"><name>SDFusion.py</name>
+  <compound refid="class_s_d_fusion_via_points_1_1_my_execute_event_handler" kind="class"><name>SDFusionViaPoints::MyExecuteEventHandler</name>
+    <member refid="class_s_d_fusion_via_points_1_1_my_execute_event_handler_1a14e5f0fa96f85391f1b11a7ae7c3651f" kind="function"><name>__init__</name></member>
+    <member refid="class_s_d_fusion_via_points_1_1_my_execute_event_handler_1a49c3bd3929510094618864a655571652" kind="function"><name>notify</name></member>
+  </compound>
+  <compound refid="namespace_s_d_fusion_via_points" kind="namespace"><name>SDFusionViaPoints</name>
+    <member refid="_s_d_fusion_via_points_8py_1a5410010255a3e4ceea327fa9f25ba5d5" kind="variable"><name>handlers</name></member>
+    <member refid="_s_d_fusion_via_points_8py_1a718e15c411de0f4d166dae85a0c1dd5c" kind="variable"><name>ui</name></member>
+    <member refid="_s_d_fusion_via_points_8py_1aafe67f2784d16a5b282e21a7fe04cce5" kind="variable"><name>app</name></member>
+    <member refid="_s_d_fusion_via_points_8py_1a955311120d3486304744ac5883072a2b" kind="variable"><name>rowNumber</name></member>
+    <member refid="_s_d_fusion_via_points_8py_1a71b4b784cdb001436e4d49a116153971" kind="variable"><name>numberViaPoints</name></member>
+    <member refid="_s_d_fusion_via_points_8py_1ae38523e6ce40d2737f0b6560c8a0c7d5" kind="function"><name>addRow</name></member>
+    <member refid="_s_d_fusion_via_points_8py_1a63c5a952fa466a2743ca33305f089d87" kind="function"><name>run</name></member>
+    <member refid="_s_d_fusion_via_points_8py_1add6b32333c5abaeacf04fb337c2837a0" kind="function"><name>stop</name></member>
+  </compound>
+  <compound refid="_s_d_fusion_via_points_8py" kind="file"><name>SDFusionViaPoints.py</name>
   </compound>
 </doxygenindex>
