@@ -3,33 +3,46 @@
 Getting started
 ===============
 
-Make sure that your robot model is specified correctly (**see below**) before running the script. Furthermore you have to adapt the script to your use case (**see below**).
+Make sure that all links of the robot are defined as rigid groups and named correctly. For more information on how to correctly define the robot model see http://sdfusion.readthedocs.io/en/master/.
 
-To run the script in Fusion, run the Script and Add-Ins command and select the SDFusion script. Click the "Run" button. The script automatically exports robot links and joints (and joint limits) to SDFormat and creates the required mesh files. For large robot models the script takes several minutes to finish and Fusion will freeze during that time. When the scipt is finished a success dialog is shown in Fusion. You now find your files in the desired location.
+To run the script in Fusion, run the Script and Add-Ins command and select the SDFusionViaPoints addin. Click the "Run" button. A button with Roboy logo named Via-Points shows up in the left end of the 'MODEL'-taskbar in Fusion. 
 
-.. _model_specification:
+.. _background_information_via_points:
 
-Model specification
--------------------
+Background information on Via-Points:
+-------------------------------------
 
-A good practice is to generate a dedicated simulation copy of the Fusion robot model.
+Via-Points are the points along which a tendon of the robot is routed. Correctly defined, they can be used **1)** as a documentation on where the tendons in the real robot are routed and **2)** as points in the simulation of the robot where forces are added.
 
-Therein all links of the robot have to be designed as rigid groups. All rigid groups will be exported as mesh (STL) files and will be listed in the model SDF file. make sure, taht all rigid groups have a unique name!
+For every Via-Point these parameters need to be known:
+- MyoMuscle: To which myoMuscle this via-point belongs
+- Link: On which link this via-point is fixed
+- Number: the number of the via-point, so that the tendon runs from the muscle unit through the via-points with ascending numbers
 
-At the moment the following joint types are supported: fixed, cylindrical and ball joint. For cylindrical joints the joint limits are automatically exported. For ball joints the joint limits can't be exported, as this is not supported by the SDFormat. Make sure that all joints have a unique name!
 
-Make sure to select your robot model as the **active product**, otherwise your SDF file will be empty.
+.. _run_UI:
+
+Running the User Interface:
+---------------------------
+
+To use the UI click on the Button with Roboy logo named Via-Points. This action needs to be performed for every myoMuscle to which  you want to  add via-points. A dialog window pops up. It is separated into three sections:
+
+1. Select the number of the myoMucle for which you want to specify via-points.
+
+2. Select the via-points you want to add. You can select thw number of the via-point and on which link it is fixed. The last input lets you select which of the **Selections** in the third part of the dialog window belong to the given via-point information. This is not the smoothest solution, but could not be solved better, because of restrictions in the Fusion API.
+
+3. Select holes in the robot model in which the via-points are located. At the moment the selection is restricted to curved edges.
+
+.. _clicking_OK:
+
+Clicking OK:
+------------
+
+To create the new via-points for the robot model click **OK** in the dialog window. Fusion automatically creates arbitrarily named via-points (construction points) in the robot model, that can be exported by the SDFusion exporter.
 
 .. _adapting_the_script:
 
 Adapting the script
 -------------------
 
-Two lines of the script need to be modified by the user:
-
-The variable **fileDir** specifies the location where the generated model.sdf file will be written to. Make sure that this folder contains a folder called "meshes".
-
-The variable **modelName** specifies the name of the robot model. This is the name under which you will find the model in Gazebo.
-
-.. figure:: images/GlobalVariables.png
-  :alt: Change these variables
+The script should not be adapted by the user to its needs right now, as it is under heavy developement. In the future there will be the opportunity to hard-code the link names, so that no rigid groups need to be created for that.

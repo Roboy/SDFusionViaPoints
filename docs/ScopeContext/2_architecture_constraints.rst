@@ -12,7 +12,7 @@ Technical Constraints / Runtime Interface Requirements
   :header: "Constraint Name", "Description"
   :widths: 20, 60
 
-  "Autodesk Fusion 360", "Script is specific to Autodesk Fusion 360, it doesn't run under other CAD programs."
+  "Autodesk Fusion 360", "Addin is specific to Autodesk Fusion 360, it doesn't run under other CAD programs."
 
 .. csv-table:: Operating System Constraints
   :header: "Constraint Name", "Description"

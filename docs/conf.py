@@ -66,8 +66,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'SDFusion'
-copyright = u'2016, Anna Sesselmann, based on Template by Dr. Peter'
+project = u'SDFusionViaPoints'
+copyright = u'2017, Anna Sesselmann, based on Template by Dr. Peter'
 author = u'Anna Sesselmann'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -254,7 +254,7 @@ html_static_path = ['_static']
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'SDFusiondoc'
+htmlhelp_basename = 'SDFusionViaPointsdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -322,7 +322,7 @@ latex_elements = {
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'SDFusion', u'SDFusion',
+    (master_doc, 'SDFusionViaPoints', u'SDFusionViaPoints',
      [author], 1)
 ]
 
@@ -337,8 +337,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'SDFusion', u'SDFusion',
-     author, 'SDFusion', 'Export Autodesk Fusion 360 models to SDFormat.',
+    (master_doc, 'SDFusionViaPoints', u'SDFusionViaPoints',
+     author, 'SDFusionViaPoints', 'UI for Fusion 360 to add Via-Points',
      'Miscellaneous'),
 ]
 

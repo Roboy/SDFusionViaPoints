@@ -3,7 +3,7 @@
 Installation
 =============
 
-Git clone the following repository: https://github.com/Roboy/SDFusion
+Git clone the following repository: https://github.com/Roboy/SDFusionViaPoints
 
 **Do NOT rename the folder/ the .py file or the .manifest file!**
 

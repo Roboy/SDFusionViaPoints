@@ -3,4 +3,4 @@
 User Interfaces
 ===============
 
-There is no (G)UI.
+The whole addin is basically a user interface and is described in the sections above. 
