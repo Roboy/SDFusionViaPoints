@@ -8,7 +8,7 @@
 Welcome to SDFusionViaPoints!
 ===========================================================
 
-This project provides an user interface for Autodesk Fusion 360, that ĺets users easily add and modify muscle via-points. The SDFusion exporter (links see below) is able to parse these via-points into SDFormat. This is used to simulate our tendon-driven robots.
+This project provides an user interface for Autodesk Fusion 360, that lets users easily add and modify muscle via-points. The SDFusion exporter (links see below) is able to parse these via-points into SDFormat. This is used to simulate our tendon-driven robots.
 
 The user interface itself is a python addin, which needs to be loaded into Autdesk Fusion 360 and executed.
 
