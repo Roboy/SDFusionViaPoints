@@ -5,7 +5,9 @@ Getting started
 
 Make sure that all links of the robot are defined as rigid groups and named correctly. For more information on how to correctly define the robot model see http://sdfusion.readthedocs.io/en/master/.
 
-To run the script in Fusion, run the Script and Add-Ins command and select the SDFusionViaPoints addin. Click the "Run" button. A button with Roboy logo named Via-Points shows up in the left end of the 'MODEL'-taskbar in Fusion. 
+To run the script in Fusion, run the Script and Add-Ins command and select the SDFusionViaPoints addin. Click the "Run" button. A button with Roboy logo named Via-Points shows up in the left end of the 'MODEL'-taskbar in Fusion.
+
+Please be aware, that the addin is currently being developed. Therefore full functionality is not given and the user is required to read :ref:`features` carefully.
 
 .. _background_information_via_points:
 
@@ -33,6 +35,9 @@ To use the UI click on the Button with Roboy logo named Via-Points. This action 
 
 3. Select holes in the robot model in which the via-points are located. At the moment the selection is restricted to curved edges.
 
+.. figure:: images/UI.png
+  :alt: Screenshot of the Dialog Window
+
 .. _clicking_OK:
 
 Clicking OK:
@@ -46,3 +51,10 @@ Adapting the script
 -------------------
 
 The script should not be adapted by the user to its needs right now, as it is under heavy developement. In the future there will be the opportunity to hard-code the link names, so that no rigid groups need to be created for that.
+
+.. _features:
+
+Non-Features:
+-------------
+
+The via-points are only created, if all input fields in the dialog window are filled out. The link names are static and hard-coded at the moment.
