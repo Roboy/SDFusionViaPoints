@@ -12,7 +12,7 @@ app = None
 ## global varibale to keep track of how many table rows are created
 rowNumber = 0
 ## global variable to specify how many via points can be input in the dialog window
-numberViaPoints = 3
+numberViaPoints = 6
 ## global variable to specify the links that can be choosen
 links = ['Link 1','Link 2']
 
@@ -120,7 +120,7 @@ class MyExecuteEventHandler(adsk.core.CommandEventHandler):
                 edge = adsk.fusion.BRepEdge.cast(inputs.itemById(commandId + '_selection' + str(i)).selection(0).entity)
                 edges.append(edge)
             # get all via point information
-            for i in range(1,numberViaPoints):
+            for i in range(1,numberViaPoints+1):
                 # get via point number
                 numberInput = tableInput.getInputAtPosition(i, 0).id
                 numberInput = inputs.itemById(numberInput)
@@ -131,7 +131,7 @@ class MyExecuteEventHandler(adsk.core.CommandEventHandler):
                 # get via point position
                 selectionInput = tableInput.getInputAtPosition(i, 2)
                 selection = selectionInput.selectedItem.name
-                edge = edges[int(selection[-1:])-1]
+                edge = edges[int(selection[-1:])]
                 # Get construction points
                 global app
                 product = app.activeProduct
