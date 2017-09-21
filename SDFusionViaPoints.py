@@ -16,6 +16,8 @@ links = []
 ## global variable to hold the root component of the model
 rootComp = None
 
+allVP = []
+
 
 
 ## Event handler for the commandCreated event.
@@ -33,197 +35,61 @@ class ButtonCommandCreatedHandler(adsk.core.CommandCreatedEventHandler):
         cmd.destroy.add(onDestroy)
         handlers.append(onDestroy)
 
-        # Connect to the input changed event.           
-        onInputChanged = MyCommandInputChangedHandler()
-        cmd.inputChanged.add(onInputChanged)
-        handlers.append(onInputChanged)
-
-        inputs = cmd.commandInputs
-
-        # Create tab 'add'
-        tabCmdInput1 = inputs.addTabCommandInput('tab_1', 'Add Via-Points');
-        tab1ChildInputs = tabCmdInput1.children;
-
-        # Create a message that spans the entire width of the dialog by leaving out the "name" argument.
-        message = '<div>Here is the description.</div>'
-        tab1ChildInputs.addTextBoxCommandInput('fullWidth_textBox', '', message, 1, True)
-
-        # Create 'add' button
-        addButtonInput = tab1ChildInputs.addBoolValueInput('tabAdd', 'Add', False, '', True)
-
-        # Create 'selection' button
-        selectionInput = tab1ChildInputs.addSelectionInput('sel', 'Select', 'Select a circle for the via-point.')
-        selectionInput.setSelectionLimits(1,1)
-        selectionInput.addSelectionFilter("CircularEdges")
-
-        addNewViaPoint(tabCmdInput1)
-
         # connect execute event handler
         onExecuteEvent = MyExecuteEventHandler()
         cmd.execute.add(onExecuteEvent)
         handlers.append(onExecuteEvent)
 
-# Event handler that reacts to any changes the user makes to any of the command inputs.
-class MyCommandInputChangedHandler(adsk.core.InputChangedEventHandler):
-    def __init__(self):
-        super().__init__()
-    def notify(self, args):
-        try:
-            eventArgs = adsk.core.InputChangedEventArgs.cast(args)
-            inputs = eventArgs.inputs
-            cmdInput = eventArgs.input
+        # Connect to the input changed event.           
+        onInputChanged = MyCommandInputChangedHandler()
+        cmd.inputChanged.add(onInputChanged)
+        handlers.append(onInputChanged)
 
-            if cmdInput.id == 'tabAdd':
-                tabInput = cmdInput.parentCommandInput
-                addNewViaPoint(tabInput)
-            if cmdInput.id == 'selection0':
-                ui.messageBox('You did it')
-                muscleInput = inputs.itemById('muscle0')
-                muscle = muscleInput.value
-                #tableInput = inputs.itemById('table')
-                #global numberViaPoints
-                #edges = []
-                # first safe all the selections, because they get lost during the following operations
-                # due to some Fusion internal thingy
-                # for i in range(0,numberViaPoints):
-                #     selInput = inputs.itemById('selection' + str(i))
-                #     if selInput.selectionCount != 0:  
-                #             edge = adsk.fusion.BRepEdge.cast(selInput.selection(0).entity)
-                #             edges.append(edge)
-                selInput = inputs.itemById('selection0')
-                edge = adsk.fusion.BRepEdge.cast(selInput.selection(0).entity)
-                #edges.append(edge)
+        cmd.isOKButtonVisible = False
+        inputs = cmd.commandInputs
 
-                # get all via point information
-                #for i in range(1,numberViaPoints+1):
-                    # get via point number
-                    # numberInput = tableInput.getInputAtPosition(i, 0).id
-                    # numberInput = inputs.itemById(numberInput)
-                numberInput = inputs.itemById('number0')
-                number = numberInput.value
-                    # get link name
-                linkInput = inputs.itemById('link0').selectedItem
-                link = '?'
-                if linkInput:
-                    link = linkInput.name
-                    # get via point position
-                    #selectionInput = tableInput.getInputAtPosition(i, 2).selectedItem
-                #edge = None
-                #    if selectionInput:
-                        # selection = selectionInput.name
-                        # edge = edges[int(selection[-1:])]
-                        # Get construction points
-                global rootComp
-                conPoints = rootComp.constructionPoints
-                # Create construction point input
-                pointInput = conPoints.createInput()
-                # Create construction point by center
-                pointInput.setByCenter(edge)
-                point = conPoints.add(pointInput)
-                point.name = "VP_motor"+ muscle + "_" + link + "_" + number
-          
-        except:
-            ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
+        # Get all links the robot has
+        global links
+        links = getLinkNames()
 
-        # Event handler that reacts to when the command is destroyed. This terminates the script.            
-class MyCommandDestroyHandler(adsk.core.CommandEventHandler):
-    def __init__(self):
-        super().__init__()
-    def notify(self, args):
-        try:
-            # When the command is done, terminate the script
-            # This will release all globals which will remove all event handlers
-            adsk.terminate()
-        except:
-            ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
+        # Create tab 'add'
+        tabCmdInput1 = inputs.addTabCommandInput('tab_1', 'Add Via-Points');
+        createTab1(tabCmdInput1)
 
-## Event handler for the execute event.
-# 
-# This event is called when the 'OK' button in the dialog window is clicked.
-# It then starts to create constuction points with a decent naming, so that
-# the SDFusion exporter can then parse this information into an SDF file.
-class MyExecuteEventHandler(adsk.core.CommandEventHandler):
-    def __init__(self):
-        super().__init__()
-    def notify(self, args):
-        eventArgs = adsk.core.CommandEventArgs.cast(args)
-        try:
-            command = eventArgs.firingEvent.sender                
-            inputs = command.commandInputs
-            # get the mcoMuscle number
-            muscleInput = inputs.itemById('muscle0')
-            muscle = muscleInput.value
-            #tableInput = inputs.itemById('table')
-            #global numberViaPoints
-            #edges = []
-            # first safe all the selections, because they get lost during the following operations
-            # due to some Fusion internal thingy
-            # for i in range(0,numberViaPoints):
-            #     selInput = inputs.itemById('selection' + str(i))
-            #     if selInput.selectionCount != 0:  
-            #             edge = adsk.fusion.BRepEdge.cast(selInput.selection(0).entity)
-            #             edges.append(edge)
-            selInput = inputs.itemById('selection0')
-            edge = adsk.fusion.BRepEdge.cast(selInput.selection(0).entity)
-            #edges.append(edge)
+def getLinkNames():
+    # Get all links of the robot (all rigid groups)
+    # get active design
+    global app
+    product = app.activeProduct
+    design = adsk.fusion.Design.cast(product)
+    # get root component in this design
+    global rootComp
+    rootComp = design.rootComponent
+    # get all rigid groups of the root component
+    links = []
+    allRigidGroups = rootComp.allRigidGroups
+    for rig in allRigidGroups:
+        if rig is not None:
+            links.append(rig.name)
+    return links
 
-            # get all via point information
-            #for i in range(1,numberViaPoints+1):
-                # get via point number
-                # numberInput = tableInput.getInputAtPosition(i, 0).id
-                # numberInput = inputs.itemById(numberInput)
-            numberInput = inputs.itemById('number0')
-            number = numberInput.value
-                # get link name
-            linkInput = inputs.itemById('link0').selectedItem
-            link = '?'
-            if linkInput:
-                link = linkInput.name
-                # get via point position
-                #selectionInput = tableInput.getInputAtPosition(i, 2).selectedItem
-            #edge = None
-            #    if selectionInput:
-                    # selection = selectionInput.name
-                    # edge = edges[int(selection[-1:])]
-                    # Get construction points
-            global rootComp
-            conPoints = rootComp.constructionPoints
-            # Create construction point input
-            pointInput = conPoints.createInput()
-            # Create construction point by center
-            pointInput.setByCenter(edge)
-            point = conPoints.add(pointInput)
-            point.name = "VP_motor"+ muscle + "_" + link + "_" + number
-          
-        except:
-            if ui:
-                ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
+def createTab1(tabInput):
+    childInputs = tabInput.children;
 
-## This is a helper function that adds rows to the dialog windows table.
-def addRow(tableInput,i):
-    tableChildInputs = tableInput.commandInputs
-    # add input for via point number
-    childTableNumberInput = tableChildInputs.addIntegerSpinnerCommandInput(tableInput.id + '_number{}'.format(rowNumber), 'Via-Point Number', 0 , 50 , 1, i)
-    # add input for link name
-    childTableLinkInput =  tableChildInputs.addDropDownCommandInput(tableInput.id + '_link{}'.format(rowNumber), 'Select Link Name', adsk.core.DropDownStyles.LabeledIconDropDownStyle);
-    dropdownItems = childTableLinkInput.listItems
-    # add a dropdown item for every link
-    global links
-    for lin in links:
-        dropdownItems.add(lin, False, '')
-    # add selection inputs to select the via point position
-    childTableSelectInput =  tableChildInputs.addDropDownCommandInput(tableInput.id + '_select{}'.format(rowNumber), 'Select Point Number', adsk.core.DropDownStyles.LabeledIconDropDownStyle);
-    dropdownItemsSelect = childTableSelectInput.listItems
-    global numberViaPoints
-    for j in range(0,numberViaPoints):
-        dropdownItemsSelect.add('Select Number ' + str(j), False, '')
+    # Create a message that spans the entire width of the dialog by leaving out the "name" argument.
+    # TODO: Description
+    message = '<div>Here is the description.</div>'
+    childInputs.addTextBoxCommandInput('fullWidth_textBox', '', message, 1, True)
 
-    row = tableInput.rowCount
-    tableInput.addCommandInput(childTableNumberInput, row, 0)
-    tableInput.addCommandInput(childTableLinkInput, row, 1)
-    tableInput.addCommandInput(childTableSelectInput, row, 2)
-    global rowNumber
-    rowNumber = rowNumber + 1
+    # Create 'add' button
+    # addButtonInput = childInputs.addBoolValueInput('tabAdd', 'Add', False, '', True)
+
+    # # Create 'selection' button
+    # selectionInput = childInputs.addSelectionInput('sel', 'Select', 'Select a circle for the via-point.')
+    # selectionInput.setSelectionLimits(1,1)
+    # selectionInput.addSelectionFilter("CircularEdges")
+
+    addNewViaPoint(tabInput)
 
 def addNewViaPoint(tabInput):
     # Get the CommandInputs object associated with the parent command.
@@ -251,22 +117,212 @@ def addNewViaPoint(tabInput):
     global numberViaPoints
     numberViaPoints = numberViaPoints + 1
 
-def getLinkNames():
-    global app
-    # Get all links of the robot (all rigid groups)
-    # get active design
-    product = app.activeProduct
-    design = adsk.fusion.Design.cast(product)
-    # get root component in this design
-    global rootComp
-    rootComp = design.rootComponent
-    # get all rigid groups of the root component
-    links = []
-    allRigidGroups = rootComp.allRigidGroups
-    for rig in allRigidGroups:
-        if rig is not None:
-            links.append(rig.name)
-    return links
+class MyViaPoint():
+    motor = ''
+    number = ''
+    link = ''
+    edge =  None
+        
+
+# Event handler that reacts to any changes the user makes to any of the command inputs.
+class MyCommandInputChangedHandler(adsk.core.InputChangedEventHandler):
+    def __init__(self):
+        super().__init__()
+    def notify(self, args):
+        try:
+            eventArgs = adsk.core.InputChangedEventArgs.cast(args)
+            inputs = eventArgs.inputs
+            cmdInput = eventArgs.input
+
+            if cmdInput.id == 'tabAdd':
+                tabInput = cmdInput.parentCommandInput
+                addNewViaPoint(tabInput)
+            if cmdInput.id == 'selection0':
+                
+
+
+                muscleInput = inputs.itemById('muscle0')
+                muscle = muscleInput.value
+
+
+
+
+                #tableInput = inputs.itemById('table')
+                #global numberViaPoints
+                #edges = []
+                # first safe all the selections, because they get lost during the following operations
+                # due to some Fusion internal thingy
+                # for i in range(0,numberViaPoints):
+                #     selInput = inputs.itemById('selection' + str(i))
+                #     if selInput.selectionCount != 0:  
+                #             edge = adsk.fusion.BRepEdge.cast(selInput.selection(0).entity)
+                #             edges.append(edge)
+                selInput = inputs.itemById('selection0')
+                selection  = selInput.selection(0)
+                entity =  selection.entity
+                edge = adsk.fusion.BRepEdge.cast(entity)
+                #edges.append(edge)
+
+                # get all via point information
+                #for i in range(1,numberViaPoints+1):
+                    # get via point number
+                    # numberInput = tableInput.getInputAtPosition(i, 0).id
+                    # numberInput = inputs.itemById(numberInput)
+                                        # get via point position
+                    #selectionInput = tableInput.getInputAtPosition(i, 2).selectedItem
+                #edge = None
+                #    if selectionInput:
+                        # selection = selectionInput.name
+                        # edge = edges[int(selection[-1:])]
+                        # Get construction points
+
+
+
+
+                numberInput = inputs.itemById('number0')
+                number = numberInput.value
+                # get link name
+                linkInput = inputs.itemById('link0').selectedItem
+                link = '?'
+                if linkInput:
+                    link = linkInput.name
+
+                global rootComp
+                conPoints = rootComp.constructionPoints
+                # Create construction point input
+                pointInput = conPoints.createInput()
+                # Create construction point by center
+                pointInput.setByCenter(edge)
+                point = conPoints.add(pointInput)
+                point.name = "VP_motor"+ muscle + "_" + link + "_" + number
+
+                vp = MyViaPoint()
+                vp.motor =  muscle
+                vp.link = link
+                vp.number = number
+                vp.edge =  edge
+
+                global allVP
+                allVP.append(vp)
+
+                # automatically increase VP number by 1
+                numberInput.value = str(int(number) + 1)
+
+                #
+                #selInput.addSelection(entity)
+          
+
+
+
+
+        except:
+            ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
+
+
+
+## Event handler for the execute event.
+# 
+# This event is called when the 'OK' button in the dialog window is clicked.
+# It then starts to create constuction points with a decent naming, so that
+# the SDFusion exporter can then parse this information into an SDF file.
+class MyExecuteEventHandler(adsk.core.CommandEventHandler):
+    def __init__(self):
+        super().__init__()
+    def notify(self, args):
+        eventArgs = adsk.core.CommandEventArgs.cast(args)
+        try:
+            adsk.doEvents()
+            # command = eventArgs.firingEvent.sender                
+            # inputs = command.commandInputs
+            # # get the mcoMuscle number
+            # muscleInput = inputs.itemById('muscle0')
+            # muscle = muscleInput.value
+
+            # selInput = inputs.itemById('selection0')
+            # edge = adsk.fusion.BRepEdge.cast(selInput.selection(0).entity)
+            # numberInput = inputs.itemById('number0')
+            # number = numberInput.value
+            #     # get link name
+            # linkInput = inputs.itemById('link0').selectedItem
+            # link = '?'
+            # if linkInput:
+            #     link = linkInput.name
+            # global rootComp
+            # conPoints = rootComp.constructionPoints
+            # # Create construction point input
+            # pointInput = conPoints.createInput()
+            # # Create construction point by center
+            # pointInput.setByCenter(edge)
+            # point = conPoints.add(pointInput)
+            # point.name = "VP_motor"+ muscle + "_" + link + "_" + number
+          
+        except:
+            if ui:
+                ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
+
+                        #tableInput = inputs.itemById('table')
+            #global numberViaPoints
+            #edges = []
+            # first safe all the selections, because they get lost during the following operations
+            # due to some Fusion internal thingy
+            # for i in range(0,numberViaPoints):
+            #     selInput = inputs.itemById('selection' + str(i))
+            #     if selInput.selectionCount != 0:  
+            #             edge = adsk.fusion.BRepEdge.cast(selInput.selection(0).entity)
+            #             edges.append(edge)
+
+# Event handler that reacts to when the command is destroyed. This terminates the script.            
+class MyCommandDestroyHandler(adsk.core.CommandEventHandler):
+    def __init__(self):
+        super().__init__()
+    def notify(self, args):
+        try:
+            # When the command is done, terminate the script
+            # This will release all globals which will remove all event handlers
+            global allVP
+            for vp in allVP:
+                muscle = vp.motor
+                link = vp.link
+                number = vp.number
+                edge =  vp.edge
+                global rootComp
+                conPoints = rootComp.constructionPoints
+                # Create construction point input
+                pointInput = conPoints.createInput()
+                # Create construction point by center
+                pointInput.setByCenter(edge)
+                point = conPoints.add(pointInput)
+                point.name = "VP_motor"+ muscle + "_" + link + "_" + number
+                adsk.doEvents()
+            adsk.terminate()
+        except:
+            ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
+
+# This is a helper function that adds rows to the dialog windows table.
+# def addRow(tableInput,i):
+#     tableChildInputs = tableInput.commandInputs
+#     # add input for via point number
+#     childTableNumberInput = tableChildInputs.addIntegerSpinnerCommandInput(tableInput.id + '_number{}'.format(rowNumber), 'Via-Point Number', 0 , 50 , 1, i)
+#     # add input for link name
+#     childTableLinkInput =  tableChildInputs.addDropDownCommandInput(tableInput.id + '_link{}'.format(rowNumber), 'Select Link Name', adsk.core.DropDownStyles.LabeledIconDropDownStyle);
+#     dropdownItems = childTableLinkInput.listItems
+#     # add a dropdown item for every link
+#     global links
+#     for lin in links:
+#         dropdownItems.add(lin, False, '')
+#     # add selection inputs to select the via point position
+#     childTableSelectInput =  tableChildInputs.addDropDownCommandInput(tableInput.id + '_select{}'.format(rowNumber), 'Select Point Number', adsk.core.DropDownStyles.LabeledIconDropDownStyle);
+#     dropdownItemsSelect = childTableSelectInput.listItems
+#     global numberViaPoints
+#     for j in range(0,numberViaPoints):
+#         dropdownItemsSelect.add('Select Number ' + str(j), False, '')
+
+#     row = tableInput.rowCount
+#     tableInput.addCommandInput(childTableNumberInput, row, 0)
+#     tableInput.addCommandInput(childTableLinkInput, row, 1)
+#     tableInput.addCommandInput(childTableSelectInput, row, 2)
+#     global rowNumber
+#     rowNumber = rowNumber + 1
 
 ## This function handles what happens as soon as the addin is started.
 # 
@@ -280,10 +336,6 @@ def run(context):
         global ui
         ui  = app.userInterface
         cmdDefs = ui.commandDefinitions
-
-        # Get all links the robot has
-        global links
-        links = getLinkNames()
 
         # Create a button command definition.
         button = cmdDefs.itemById('ViaPointButtonID')
